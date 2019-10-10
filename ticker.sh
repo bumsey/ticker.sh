@@ -16,8 +16,6 @@ if [ -z "$SYMBOLS" ]; then
   exit
 fi
 
-FIELDS=(symbol marketState regularMarketPrice regularMarketChange regularMarketChangePercent \
-  preMarketPrice preMarketChange preMarketChangePercent postMarketPrice postMarketChange postMarketChangePercent)
 API_ENDPOINT="https://query1.finance.yahoo.com/v7/finance/quote?lang=en-US&region=US&corsDomain=finance.yahoo.com"
 
 if [ -z "$NO_COLOR" ]; then
@@ -28,9 +26,8 @@ if [ -z "$NO_COLOR" ]; then
 fi
 
 symbols=$(IFS=,; echo "${SYMBOLS[*]}")
-fields=$(IFS=,; echo "${FIELDS[*]}")
 
-results=$(curl --silent "$API_ENDPOINT&fields=$fields&symbols=$symbols" \
+results=$(curl --silent "$API_ENDPOINT&symbols=$symbols" \
   | jq '.quoteResponse .result')
 
 query () {
