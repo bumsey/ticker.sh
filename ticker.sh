@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 LANG=C
@@ -34,7 +34,7 @@ query () {
   echo $results | jq -r ".[] | select(.symbol == \"$1\") | .$2"
 }
 
-for symbol in $(IFS=' '; echo "${SYMBOLS[*]}"); do
+for symbol in $(IFS=' '; echo "${SYMBOLS[*]}" | tr '[:lower:]' '[:upper:]'); do
   marketState="$(query $symbol 'marketState')"
 
   if [ -z $marketState ]; then
@@ -66,7 +66,7 @@ for symbol in $(IFS=' '; echo "${SYMBOLS[*]}"); do
     percent=$(query $symbol 'regularMarketChangePercent')
   fi
 
-  if [ "$diff" == "0" ]; then
+  if [ "$diff" == "0" ] || [ "$diff" == "0.0" ]; then
     color=
   elif ( echo "$diff" | grep -q ^- ); then
     color=$COLOR_RED
@@ -74,7 +74,9 @@ for symbol in $(IFS=' '; echo "${SYMBOLS[*]}"); do
     color=$COLOR_GREEN
   fi
 
-  printf "%-10s$COLOR_BOLD%8.2f$COLOR_RESET" $symbol $price
-  printf "$color%10.2f%12s$COLOR_RESET" $diff $(printf "(%.2f%%)" $percent)
-  printf " %s\n" "$nonRegularMarketSign"
+  if [ "$price" != "null" ]; then
+    printf "%-10s$COLOR_BOLD%8.2f$COLOR_RESET" $symbol $price
+    printf "$color%10.2f%12s$COLOR_RESET" $diff $(printf "(%.2f%%)" $percent)
+    printf " %s\n" "$nonRegularMarketSign"
+  fi
 done
